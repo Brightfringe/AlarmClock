@@ -1,52 +1,79 @@
-const alarmAudio = document.getElementById('alarmSound');
-const popup = document.getElementById('alarmPopup');
-const triggeredAlarms = new Set();
+let alarmAudio = new Audio('/audio/alarm.mp3');
+alarmAudio.preload = "auto";
+let alarmInterval = null;
 
-
-function showAlarmPopup() { popup.style.display = 'block'; }
-function hideAlarmPopup() {
-    popup.style.display = 'none';
-    alarmAudio.pause();
-    alarmAudio.currentTime = 0;
-}
-
-
-document.addEventListener('keydown', function(event) {
-    if (event.key === "Enter") hideAlarmPopup();
-});
-
-
+// Live Clock
 function updateClock() {
+    const clock = document.getElementById("clock");
     const now = new Date();
-    const hh = now.getHours().toString().padStart(2,'0');
-    const mm = now.getMinutes().toString().padStart(2,'0');
-    const ss = now.getSeconds().toString().padStart(2,'0');
-    document.getElementById('liveClock').innerText = `${hh}:${mm}:${ss}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
+    const timeString = now.toLocaleTimeString("en-GB", { hour12: false });
+    clock.textContent = timeString;
 
-
-function checkAlarms() {
-    const now = new Date();
-    const currentTime = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+    // Only check alarms on exact minute
+    const currentTime = timeString.slice(0, 5); // "HH:mm"
 
     document.querySelectorAll("tbody tr").forEach(row => {
-        const time = row.getAttribute('data-time');
-        const isActive = row.getAttribute('data-active') === 'true';
+        const alarmTime = row.children[0].innerText; // time from table
+        const active = row.children[2].innerText === "On";
 
-        if (isActive && time === currentTime && !triggeredAlarms.has(time)) {
-            triggeredAlarms.add(time);
-            alarmAudio.play().catch(err => console.log(err));
-            showAlarmPopup();
-        }
-
-        if (time !== currentTime && triggeredAlarms.has(time)) {
-            triggeredAlarms.delete(time);
+        if (active && alarmTime === currentTime) {
+            ringAlarm(alarmTime);
         }
     });
 }
-setInterval(checkAlarms, 1000);
+setInterval(updateClock, 1000);
+
+// 🔔 Ring Alarm
+function ringAlarm(label) {
+    if (alarmInterval) return; // prevent multiple alarms
+
+    const popup = document.getElementById("alarmPopup");
+    popup.style.display = "flex";
+
+    alarmAudio.loop = true;
+
+    alarmAudio.play().then(() => {
+        console.log("Alarm ringing:", label);
+    }).catch(err => {
+        console.log("Autoplay blocked. Click anywhere once to unlock sound.");
+    });
+
+    alarmInterval = setInterval(() => {
+        console.log("Alarm still ringing:", label);
+    }, 1000);
+}
+
+// ✋ Stop Alarm
+function stopAlarm() {
+    if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+    }
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+    document.getElementById("alarmPopup").style.display = "none";
+}
+
+// Stop button
+document.getElementById("stopAlarm").addEventListener("click", stopAlarm);
+
+// Stop with Enter
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        stopAlarm();
+    }
+});
+
+// 🔑 Unlock audio autoplay after first click
+document.addEventListener("click", () => {
+    alarmAudio.play().then(() => {
+        alarmAudio.pause();
+        alarmAudio.currentTime = 0;
+        console.log("✅ Audio unlocked for autoplay");
+    }).catch(err => console.log("Still blocked:", err));
+}, { once: true });
+
+
 
 
 
