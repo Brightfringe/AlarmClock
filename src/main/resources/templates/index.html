@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Alarm Clock</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+<div class="container">
+    <!-- Header + Live Clock -->
+    <div class="header">
+        <h1> Alarm Clock</h1>
+        <div id="liveClock" class="clock">00:00:00</div>
+    </div>
+
+    <!-- Add New Alarm Form -->
+    <div class="form-container">
+        <h2>Add New Alarm</h2>
+        <form th:action="@{/alarms/add}" method="post">
+            <input type="time" name="time" required>
+            <input type="text" name="label" placeholder="Alarm Label" required>
+
+            <!-- Modern toggle switch for Active -->
+            <label class="switch">
+                <input type="checkbox" name="active">
+                <span class="slider round"></span>
+                Active
+            </label>
+
+            <button type="submit" class="add-btn">Add Alarm</button>
+        </form>
+    </div>
+
+    <!-- Existing Alarms -->
+    <div class="alarms-container">
+        <h2>Existing Alarms</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Label</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="alarm, iterStat : ${alarms}"
+                th:attr="data-time=${alarm.time},data-active=${alarm.active}">
+                <td th:text="${alarm.time}">08:00</td>
+                <td th:text="${alarm.label}">Morning Alarm</td>
+                <td th:text="${alarm.active ? 'Yes' : 'No'}">Yes</td>
+                <td>
+                    <form th:action="@{/alarms/toggle/{id}(id=${iterStat.index})}" method="post" style="display:inline">
+                        <button type="submit" class="toggle-btn">Toggle</button>
+                    </form>
+                    <form th:action="@{/alarms/delete/{id}(id=${iterStat.index})}" method="post" style="display:inline">
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Alarm Popup -->
+<div id="alarmPopup" class="popup">
+    <p> Alarm Ringing!</p>
+    <button onclick="hideAlarmPopup()">Close</button>
+</div>
+
+<!-- Audio -->
+<audio id="alarmSound" src="/audio/alarm.mp3" preload="auto"></audio>
+
+<!-- JS -->
+<script th:src="@{/js/script.js}"></script>
+</body>
+</html>
+
+
+
+
+
+
+
