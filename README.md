@@ -1,6 +1,6 @@
 # Alarm Clock
 
-A simple and responsive Alarm Clock application built using HTML, CSS, and JavaScript. This project allows users to set alarms, manage time efficiently, and experience a clean user interface with real-time clock functionality.
+A simple and responsive Alarm Clock application built using HTML, CSS, and Java. This project allows users to set alarms, manage time efficiently, and experience a clean user interface with real-time clock functionality.
 
 ## Features
 
@@ -14,7 +14,7 @@ A simple and responsive Alarm Clock application built using HTML, CSS, and JavaS
 
 * HTML
 * CSS
-* JavaScript
+* Java
 
 ## Project Structure
 
